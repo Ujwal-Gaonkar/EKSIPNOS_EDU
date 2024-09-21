@@ -97,7 +97,7 @@ const EnquiryForm: React.FC = () => {
           setSuccessMessage(result.message || 'Form submission failed.');
         }
       } catch (error) {
-        setSuccessMessage('An error occurred during form submission.');
+        setSuccessMessage('An error occurred during form submission.',error);
       }
     }
   };

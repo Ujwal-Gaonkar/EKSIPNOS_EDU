@@ -19,21 +19,20 @@ const Dashboard: React.FC = () => {
   useEffect(() => {
     // Fetch user count
     fetchUserCount()
-      .then((response) => {
-        setUserCount(response.data.count);
-      })
-      .catch((err) => {
-        console.error('Error fetching user count:', err);
-      });
+  .then((response: { data: { count: number } }) => {
+    setUserCount(response.data.count);
+  })
+  .catch((err: unknown) => {
+    console.error('Error fetching user count:', err);
+  });
 
-    // Fetch recent enquiries (limit to 3)
-    fetchRecentEnquiries()
-      .then((response) => {
-        setRecentEnquiries(response.data.enquiries.slice(0, 3)); // Limit to 3 enquiries
-      })
-      .catch((err) => {
-        console.error('Error fetching recent enquiries:', err);
-      });
+fetchRecentEnquiries()
+  .then((response: { data: { enquiries: Enquiry[] } }) => {
+    setRecentEnquiries(response.data.enquiries.slice(0, 3));
+  })
+  .catch((err: unknown) => {
+    console.error('Error fetching recent enquiries:', err);
+  });
   }, []);
 
   return (

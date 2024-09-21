@@ -20,15 +20,14 @@ const Enquiries: React.FC = () => {
 
   useEffect(() => {
     fetchEnquiries()
-      .then((response) => {
-        setEnquiries(response.data.enquiries);
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.error('Error fetching enquiries:', err);
-        toast.error('Failed to fetch enquiries.');
-        setLoading(false);
-      });
+  .then((response: { data: { enquiries: Enquiry[] } }) => {
+    setEnquiries(response.data.enquiries);
+    setLoading(false);
+  })
+  .catch((err: unknown) => {
+    console.error('Error fetching enquiries:', err);
+    setLoading(false);
+  });
   }, []);
 
   const handleDelete = async (id: string) => {

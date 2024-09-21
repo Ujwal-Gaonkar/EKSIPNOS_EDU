@@ -52,11 +52,11 @@ const Register = () => {
 
       if (response.ok) {
         alert('Registration successful!');
-        router.push('/'); // Redirect to homepage after successful registration
+        router.push('/login'); // Redirect to login page after successful registration
       } else {
         setError(data.message || 'Failed to register. Please try again.');
       }
-    } catch (error) {
+    } catch  {
       setError('An error occurred. Please try again.');
     } finally {
       setIsLoading(false);
@@ -96,7 +96,7 @@ const Register = () => {
               name="name"
               value={formData.name}
               onChange={handleChange}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-black" // Ensure black input text
               required
             />
           </div>
@@ -110,7 +110,7 @@ const Register = () => {
               name="email"
               value={formData.email}
               onChange={handleChange}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-black" // Ensure black input text
               required
             />
           </div>
@@ -124,7 +124,7 @@ const Register = () => {
               name="password"
               value={formData.password}
               onChange={handleChange}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-black" // Ensure black input text
               required
             />
           </div>

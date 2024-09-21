@@ -1,18 +1,21 @@
-import { AuthProvider } from './context/AuthContext';  // Correct path
-import ProtectedRoute from '../components/ProtectedRoute'; // Protected route component
+import { AuthProvider } from '../pages/context/AuthContext';  // Correct path to AuthContext
+import ProtectedRoute from '../components/ProtectedRoute'; // Ensure ProtectedRoute path is correct
 import { useRouter } from 'next/router';
 import '../styles/globals.css';
+import { AppProps } from 'next/app';
 
-const noAuthRequired = ['/', '/login', '/register']; // Routes that do not require authentication
+const noAuthRequired = ['/', '/login', '/register']; // List of routes that do not require authentication
 
-export default function App({ Component, pageProps }: any) {
+function MyApp({ Component, pageProps }: AppProps) {
   const router = useRouter();
 
   return (
     <AuthProvider>
       {noAuthRequired.includes(router.pathname) ? (
+        // For pages that do not require authentication
         <Component {...pageProps} />
       ) : (
+        // For protected pages that require authentication
         <ProtectedRoute>
           <Component {...pageProps} />
         </ProtectedRoute>
@@ -20,3 +23,5 @@ export default function App({ Component, pageProps }: any) {
     </AuthProvider>
   );
 }
+
+export default MyApp;

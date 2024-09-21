@@ -1,7 +1,5 @@
 import { useState } from 'react';
 import Image from 'next/image';
-import debounce from 'lodash/debounce';
-
 
 interface FormData {
   name: string;
@@ -20,28 +18,77 @@ const EnquiryForm: React.FC = () => {
     message: '',
   });
 
-  const debouncedHandleChange = debounce(
-    (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-      setFormData({ ...formData, [e.target.name]: e.target.value });
-    }, 
-    300 // delay in milliseconds
-  );
+  const [errors, setErrors] = useState<FormData>({
+    name: '',
+    email: '',
+    phone: '',
+    course: '',
+    message: '',
+  });
+
+  const validateForm = (): boolean => {
+    const newErrors: FormData = { name: '', email: '', phone: '', course: '', message: '' };
+    let isValid = true;
+
+    // Name validation
+    if (!formData.name) {
+      newErrors.name = 'Name is required';
+      isValid = false;
+    }
+
+    // Email validation
+    const emailPattern = /^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/;
+    if (!formData.email) {
+      newErrors.email = 'Email is required';
+      isValid = false;
+    } else if (!emailPattern.test(formData.email)) {
+      newErrors.email = 'Enter a valid email';
+      isValid = false;
+    }
+
+    // Phone validation
+    const phonePattern = /^[0-9]{10}$/;
+    if (!formData.phone) {
+      newErrors.phone = 'Phone number is required';
+      isValid = false;
+    } else if (!phonePattern.test(formData.phone)) {
+      newErrors.phone = 'Enter a valid 10-digit phone number';
+      isValid = false;
+    }
+
+    // Course validation
+    if (!formData.course) {
+      newErrors.course = 'Course selection is required';
+      isValid = false;
+    }
+
+    // Message validation
+    if (!formData.message) {
+      newErrors.message = 'Message is required';
+      isValid = false;
+    }
+
+    setErrors(newErrors);
+    return isValid;
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-    debouncedHandleChange(e);
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log(formData);
-    alert('Form submitted successfully!');
-    setFormData({
-      name: '',
-      email: '',
-      phone: '',
-      course: '',
-      message: '',
-    });
+    if (validateForm()) {
+      console.log(formData);
+      alert('Form submitted successfully!');
+      setFormData({
+        name: '',
+        email: '',
+        phone: '',
+        course: '',
+        message: '',
+      });
+    }
   };
 
   return (
@@ -49,33 +96,33 @@ const EnquiryForm: React.FC = () => {
       {/* Background Overlay */}
       <div className="absolute inset-0 bg-black opacity-40"></div>
 
-      <div className="container mx-auto relative z-10 flex flex-col md:flex-row items-center justify-between">
+      <div className="container mx-auto relative z-10 flex flex-col md:flex-row items-center justify-between space-y-6 md:space-y-0">
         {/* Image Section */}
-        <div className="w-full md:w-1/2 p-6">
-        <Image
-  src="/images/Counselling.png" // Image path
-  alt="Counseling"
-  width={600}
-  height={500}
-  className="rounded-lg shadow-lg transform transition duration-500 hover:scale-105"
-  priority  // Use this if you want it to load with priority
-/>
-
+        <div className="w-full md:w-1/2 p-6 flex justify-center md:justify-start">
+          <Image
+            src="/images/Counselling.png" // Image path
+            alt="Counseling"
+            width={600}
+            height={500}
+            className="rounded-lg shadow-xl transform transition-transform duration-500 hover:scale-105"
+            priority
+          />
         </div>
 
         {/* Form Section */}
-        <div className="w-full md:w-1/2 bg-white shadow-lg rounded-lg p-8 transition duration-500 transform hover:scale-105">
-          {/* Updated Text Color */}
-          <h2 className="text-4xl font-bold text-gray-900 mb-6 text-center">
+        <div className="w-full md:w-1/2 bg-white shadow-2xl rounded-2xl p-10 transition-transform duration-500 transform hover:scale-105">
+          {/* Heading */}
+          <h2 className="text-4xl font-extrabold text-gray-900 mb-6 text-center tracking-tight">
             Get Free Counseling
           </h2>
-          <p className="text-lg text-gray-700 mb-6 text-center">
-            Fill in the form below to get personalized counseling for our courses.
+          <p className="text-lg text-gray-600 mb-6 text-center">
+            Fill out the form below to get personalized counseling for our courses.
           </p>
+
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Full Name */}
-            <div>
-              <label htmlFor="name" className="block text-gray-800 font-semibold mb-2">
+            <div className="group">
+              <label htmlFor="name" className="block text-lg font-semibold text-gray-800 mb-1">
                 Full Name
               </label>
               <input
@@ -84,15 +131,16 @@ const EnquiryForm: React.FC = () => {
                 name="name"
                 value={formData.name}
                 onChange={handleChange}
-                required
                 placeholder="Enter your full name"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-300"
+                className="w-full px-5 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-transform transform group-hover:scale-105 text-black"
+                required
               />
+              {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name}</p>}
             </div>
 
             {/* Email */}
-            <div>
-              <label htmlFor="email" className="block text-gray-800 font-semibold mb-2">
+            <div className="group">
+              <label htmlFor="email" className="block text-lg font-semibold text-gray-800 mb-1">
                 Email
               </label>
               <input
@@ -101,15 +149,16 @@ const EnquiryForm: React.FC = () => {
                 name="email"
                 value={formData.email}
                 onChange={handleChange}
-                required
                 placeholder="Enter your email"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-300"
+                className="w-full px-5 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-transform transform group-hover:scale-105 text-black"
+                required
               />
+              {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
             </div>
 
             {/* Phone Number */}
-            <div>
-              <label htmlFor="phone" className="block text-gray-800 font-semibold mb-2">
+            <div className="group">
+              <label htmlFor="phone" className="block text-lg font-semibold text-gray-800 mb-1">
                 Phone Number
               </label>
               <input
@@ -118,15 +167,16 @@ const EnquiryForm: React.FC = () => {
                 name="phone"
                 value={formData.phone}
                 onChange={handleChange}
-                required
                 placeholder="Enter your phone number"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-300"
+                className="w-full px-5 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-transform transform group-hover:scale-105 text-black"
+                required
               />
+              {errors.phone && <p className="text-red-500 text-sm mt-1">{errors.phone}</p>}
             </div>
 
             {/* Course of Interest */}
-            <div>
-              <label htmlFor="course" className="block text-gray-800 font-semibold mb-2">
+            <div className="group">
+              <label htmlFor="course" className="block text-lg font-semibold text-gray-800 mb-1">
                 Course of Interest
               </label>
               <select
@@ -134,26 +184,27 @@ const EnquiryForm: React.FC = () => {
                 name="course"
                 value={formData.course}
                 onChange={handleChange}
+                className="w-full px-5 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-transform transform group-hover:scale-105 text-black"
                 required
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-300"
               >
                 <option value="" disabled>
                   Select a course
                 </option>
-                <option value="BCOM" className="text-black">BCOM</option>
-                <option value="BBA" className="text-black">BBA</option>
-                <option value="BCA" className="text-black">BCA</option>
-                <option value="BA" className="text-black">BA</option>
-                <option value="MBA" className="text-black">MBA</option>
-                <option value="MCA" className="text-black">MCA</option>
-                <option value="MCOM" className="text-black">MCOM</option>
-                <option value="MAJMC" className="text-black">MAJMC</option>
+                <option value="BCOM">BCOM</option>
+                <option value="BBA">BBA</option>
+                <option value="BCA">BCA</option>
+                <option value="BA">BA</option>
+                <option value="MBA">MBA</option>
+                <option value="MCA">MCA</option>
+                <option value="MCOM">MCOM</option>
+                <option value="MAJMC">MAJMC</option>
               </select>
+              {errors.course && <p className="text-red-500 text-sm mt-1">{errors.course}</p>}
             </div>
 
             {/* Additional Message */}
-            <div>
-              <label htmlFor="message" className="block text-gray-800 font-semibold mb-2">
+            <div className="group">
+              <label htmlFor="message" className="block text-lg font-semibold text-gray-800 mb-1">
                 Additional Message
               </label>
               <textarea
@@ -162,15 +213,18 @@ const EnquiryForm: React.FC = () => {
                 value={formData.message}
                 onChange={handleChange}
                 placeholder="Anything else you'd like us to know?"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-300"
+                className="w-full px-5 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-transform transform group-hover:scale-105 text-black"
+                rows={4}
+                required
               ></textarea>
+              {errors.message && <p className="text-red-500 text-sm mt-1">{errors.message}</p>}
             </div>
 
             {/* Submit Button */}
             <div className="text-center">
               <button
                 type="submit"
-                className="w-full py-2 px-4 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition duration-300"
+                className="w-full py-3 px-6 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-transform transform hover:scale-105"
               >
                 Submit
               </button>

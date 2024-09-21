@@ -19,18 +19,16 @@ const ManageTeam: React.FC = () => {
 
   useEffect(() => {
     fetchUsers()
-      .then((response) => {
-        const adminsOnly = response.data.users.filter((user: Admin) => user.role === 'admin'); // Explicitly typing 'user'
+      .then((response: { data: { users: Admin[] } }) => {
+        const adminsOnly = response.data.users.filter((user: Admin) => user.role === 'admin');
         setAdmins(adminsOnly);
         setLoading(false);
       })
-      .catch((err) => {
+      .catch((err: unknown) => {
         console.error('Error fetching users:', err);
-        toast.error('Failed to fetch admins.');
         setLoading(false);
       });
   }, []);
-
   const handleDelete = async (id: string) => {
     if (confirm('Are you sure you want to remove this admin?')) {
       try {

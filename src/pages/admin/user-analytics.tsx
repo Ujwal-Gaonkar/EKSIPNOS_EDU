@@ -28,14 +28,13 @@ const UserAnalytics: React.FC = () => {
 
   useEffect(() => {
     fetchUserAnalytics()
-      .then((response) => {
-        setAnalytics(response.data.analytics);
+      .then((response: { data: { analytics: UserAnalytics } }) => {
+        setAnalytics(response.data.analytics); // Assign single object
       })
-      .catch((err) => {
+      .catch((err: unknown) => {
         console.error('Error fetching user analytics:', err);
       });
   }, []);
-
   if (!analytics) {
     return <div>Loading...</div>;
   }

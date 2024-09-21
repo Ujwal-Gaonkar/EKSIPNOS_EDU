@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import Sidebar from '@/components/admin/Sidebar';
 import { fetchUsers, updateUserRole, deleteUser } from '@/services/admin';
-import Loader from '@/components/common/Loader'; // Assuming you have a loader component
-import { toast } from 'react-hot-toast'; // For better user feedback
-import { FaTrash, FaEnvelope } from 'react-icons/fa'; // Icons for delete and email
+import Loader from '@/components/common/Loader';
+import { toast } from 'react-hot-toast';
+import { FaTrash, FaEnvelope } from 'react-icons/fa';
 
 interface User {
   _id: string;
@@ -12,21 +12,27 @@ interface User {
   role: string;
 }
 
+interface FetchUsersResponse {
+  data: {
+    users: User[];
+  };
+}
+
 const Users: React.FC = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
     fetchUsers()
-      .then((response) => {
+      .then((response: FetchUsersResponse) => {
         setUsers(response.data.users);
         setLoading(false);
       })
-      .catch((err) => {
-        console.error('Error fetching users:', err);
-        toast.error('Failed to fetch users.');
-        setLoading(false);
-      });
+     .catch((err: unknown) => {
+  console.error('Error fetching users:', err);
+  toast.error('Failed to fetch users.');
+  setLoading(false);
+});
   }, []);
 
   const handleDelete = async (id: string) => {
@@ -35,7 +41,7 @@ const Users: React.FC = () => {
         await deleteUser(id);
         setUsers(users.filter((user) => user._id !== id));
         toast.success('User deleted successfully!');
-      } catch  {
+      } catch {
         toast.error('Failed to delete user.');
       }
     }
@@ -46,7 +52,7 @@ const Users: React.FC = () => {
       await updateUserRole(id, { role });
       setUsers(users.map((user) => (user._id === id ? { ...user, role } : user)));
       toast.success('User role updated successfully!');
-    } catch  {
+    } catch {
       toast.error('Failed to update user role.');
     }
   };

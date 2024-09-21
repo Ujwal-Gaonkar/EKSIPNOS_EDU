@@ -26,6 +26,8 @@ const EnquiryForm: React.FC = () => {
     message: '',
   });
 
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+
   const validateForm = (): boolean => {
     const newErrors: FormData = { name: '', email: '', phone: '', course: '', message: '' };
     let isValid = true;
@@ -76,18 +78,27 @@ const EnquiryForm: React.FC = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (validateForm()) {
-      console.log(formData);
-      alert('Form submitted successfully!');
-      setFormData({
-        name: '',
-        email: '',
-        phone: '',
-        course: '',
-        message: '',
-      });
+      try {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/enquiry`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(formData),
+        });
+        const result = await response.json();
+        if (response.ok) {
+          setSuccessMessage('Form submitted successfully!');
+          setFormData({ name: '', email: '', phone: '', course: '', message: '' });
+        } else {
+          setSuccessMessage(result.message || 'Form submission failed.');
+        }
+      } catch (error) {
+        setSuccessMessage('An error occurred during form submission.');
+      }
     }
   };
 
@@ -112,9 +123,7 @@ const EnquiryForm: React.FC = () => {
         {/* Form Section */}
         <div className="w-full md:w-1/2 bg-white shadow-2xl rounded-2xl p-10 transition-transform duration-500 transform hover:scale-105">
           {/* Heading */}
-          <h2 className="text-4xl font-extrabold text-gray-900 mb-6 text-center tracking-tight">
-            Get Free Counseling
-          </h2>
+          <h2 className="text-4xl font-extrabold text-gray-900 mb-6 text-center tracking-tight">Get Free Counseling</h2>
           <p className="text-lg text-gray-600 mb-6 text-center">
             Fill out the form below to get personalized counseling for our courses.
           </p>
@@ -122,9 +131,7 @@ const EnquiryForm: React.FC = () => {
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Full Name */}
             <div className="group">
-              <label htmlFor="name" className="block text-lg font-semibold text-gray-800 mb-1">
-                Full Name
-              </label>
+              <label htmlFor="name" className="block text-lg font-semibold text-gray-800 mb-1">Full Name</label>
               <input
                 type="text"
                 id="name"
@@ -140,9 +147,7 @@ const EnquiryForm: React.FC = () => {
 
             {/* Email */}
             <div className="group">
-              <label htmlFor="email" className="block text-lg font-semibold text-gray-800 mb-1">
-                Email
-              </label>
+              <label htmlFor="email" className="block text-lg font-semibold text-gray-800 mb-1">Email</label>
               <input
                 type="email"
                 id="email"
@@ -158,9 +163,7 @@ const EnquiryForm: React.FC = () => {
 
             {/* Phone Number */}
             <div className="group">
-              <label htmlFor="phone" className="block text-lg font-semibold text-gray-800 mb-1">
-                Phone Number
-              </label>
+              <label htmlFor="phone" className="block text-lg font-semibold text-gray-800 mb-1">Phone Number</label>
               <input
                 type="tel"
                 id="phone"
@@ -176,9 +179,7 @@ const EnquiryForm: React.FC = () => {
 
             {/* Course of Interest */}
             <div className="group">
-              <label htmlFor="course" className="block text-lg font-semibold text-gray-800 mb-1">
-                Course of Interest
-              </label>
+              <label htmlFor="course" className="block text-lg font-semibold text-gray-800 mb-1">Course of Interest</label>
               <select
                 id="course"
                 name="course"
@@ -187,9 +188,7 @@ const EnquiryForm: React.FC = () => {
                 className="w-full px-5 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-transform transform group-hover:scale-105 text-black"
                 required
               >
-                <option value="" disabled>
-                  Select a course
-                </option>
+                <option value="" disabled>Select a course</option>
                 <option value="BCOM">BCOM</option>
                 <option value="BBA">BBA</option>
                 <option value="BCA">BCA</option>
@@ -204,9 +203,7 @@ const EnquiryForm: React.FC = () => {
 
             {/* Additional Message */}
             <div className="group">
-              <label htmlFor="message" className="block text-lg font-semibold text-gray-800 mb-1">
-                Additional Message
-              </label>
+              <label htmlFor="message" className="block text-lg font-semibold text-gray-800 mb-1">Additional Message</label>
               <textarea
                 id="message"
                 name="message"
@@ -229,6 +226,8 @@ const EnquiryForm: React.FC = () => {
                 Submit
               </button>
             </div>
+
+            {successMessage && <p className="text-green-500 text-center mt-4">{successMessage}</p>}
           </form>
         </div>
       </div>

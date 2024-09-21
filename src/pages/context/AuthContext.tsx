@@ -3,45 +3,65 @@ import { useRouter } from 'next/router';
 
 interface AuthContextProps {
   isAuthenticated: boolean;
-  login: (token: string) => void;
+  userRole: string | null;
+  login: (token: string, role: string) => void;
   logout: () => void;
 }
 
 export const AuthContext = createContext<AuthContextProps>({
   isAuthenticated: false,
+  userRole: null,
   login: () => {},
   logout: () => {},
 });
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [loading, setLoading] = useState(true); // Loading state to prevent issues before token is checked
+  const [userRole, setUserRole] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
   const router = useRouter();
 
   useEffect(() => {
     const token = localStorage.getItem('token');
-    setIsAuthenticated(!!token); // Check if token exists
-    setLoading(false); // Set loading to false after checking token
+    const role = localStorage.getItem('role');
+    
+    if (token && role) {
+      setIsAuthenticated(true);
+      setUserRole(role);
+    } else {
+      setIsAuthenticated(false);
+      setUserRole(null);
+    }
+    setLoading(false);  // Loading is complete once token is checked
   }, []);
 
-  const login = (token: string) => {
+  const login = (token: string, role: string) => {
     localStorage.setItem('token', token);
-    setIsAuthenticated(true); // Set auth state to true after login
-    router.push('/dashboard'); // Redirect to dashboard after login
+    localStorage.setItem('role', role);
+    setIsAuthenticated(true);
+    setUserRole(role);
+    
+    router.replace('/dashboard'); // Always redirect to dashboard after login
   };
 
   const logout = () => {
     localStorage.removeItem('token');
+    localStorage.removeItem('role');
     setIsAuthenticated(false);
-    router.push('/'); // Directly redirect to home page after logout
+    setUserRole(null);
+    router.replace('/');  // Redirect to home after logout
   };
 
   if (loading) {
-    return <div>Loading...</div>; // You can add a loading spinner here
+    return (
+      <div className="h-screen flex justify-center items-center">
+        <p>Loading...</p> {/* You can replace this with a proper loader component */}
+      </div>
+    );
   }
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, login, logout }}>
+    <AuthContext.Provider value={{ isAuthenticated, userRole, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

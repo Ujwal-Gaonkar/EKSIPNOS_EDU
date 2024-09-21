@@ -1,121 +1,152 @@
+import { useContext, useEffect, useState } from 'react';
+import AuthContext from '@/pages/context/AuthContext';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
-import ProtectedRoute from '@/components/ProtectedRoute';
-import { useState, useContext } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faKey, faEnvelope, faSignOutAlt, faUserCog, faUser } from '@fortawesome/free-solid-svg-icons'; // Icons
-import { AuthContext } from '@/pages/context/AuthContext'; // Assuming you have AuthContext
+import { faAngleDoubleRight, faAngleDoubleLeft, faKey, faEnvelope, faUserCog, faUser } from '@fortawesome/free-solid-svg-icons'; // New icons
 import { useRouter } from 'next/router';
 
 const Dashboard = () => {
-  const { user, isAuthenticated, logout } = useContext(AuthContext); // User data and authentication
-  const router = useRouter();
+  const { userRole, isAuthenticated } = useContext(AuthContext); // Use AuthContext
   const [selectedMenu, setSelectedMenu] = useState('profile'); // State for selected menu
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true); // Sidebar toggle for desktop and mobile
+  const router = useRouter();
 
-  // Mock admin role (replace this with your actual user role)
-  const isAdmin = user?.role === 'admin';
+  const isAdmin = userRole === 'admin'; // Check if the user is an admin
 
-  const handleLogout = () => {
-    logout();
-    router.push('/'); // Redirect to home after logout
+  useEffect(() => {
+    if (!isAuthenticated) {
+      router.push('/login'); // Redirect to login if not authenticated
+    }
+  }, [isAuthenticated, router]);
+
+  const toggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen);
   };
 
+  if (!isAuthenticated) {
+    return null; // Don't render anything if the user is not authenticated
+  }
+
   return (
-    <ProtectedRoute>
-      <div className="min-h-screen flex flex-col">
-        {/* Navbar */}
-        <Navbar />
+    <div className="min-h-screen flex flex-col bg-gray-100">
+      {/* Navbar */}
+      <Navbar />
 
-        <div className="flex flex-1">
-          {/* Sidebar */}
-          <aside className="w-64 bg-gray-900 text-white flex flex-col py-6 px-4">
-            {/* User profile */}
-            <div className="mb-8 flex items-center">
-              <img
-                src="/images/profile.jpg" // Replace with user's profile image
-                alt="Profile"
-                className="w-12 h-12 rounded-full object-cover mr-4"
-              />
-              <div>
-                <h4 className="font-bold text-lg">{user?.name || 'My Account'}</h4>
-              </div>
-            </div>
+      <div className="flex-1 flex">
+        {/* Sidebar */}
+        <aside
+          className={`${
+            isSidebarOpen ? 'w-64' : 'w-20'
+          } bg-gray-800 text-white flex flex-col py-6 transition-all duration-300 ease-in-out`}
+          style={{ marginTop: '4rem' }} // Margin added to avoid navbar overlap
+        >
+          {/* Sidebar Toggle */}
+          <button
+            className="text-white mb-4 p-2 focus:outline-none transform transition-transform duration-300 ease-in-out"
+            onClick={toggleSidebar}
+          >
+            <FontAwesomeIcon
+              icon={isSidebarOpen ? faAngleDoubleLeft : faAngleDoubleRight} // Animate with new icons
+              className="text-xl"
+            />
+          </button>
 
-            {/* Menu Items */}
-            <ul className="space-y-4">
+          {/* Menu Items */}
+          <ul className="space-y-4">
+            <li
+              onClick={() => setSelectedMenu('profile')}
+              className={`flex items-center cursor-pointer p-3 rounded-lg hover:bg-gray-700 transition-colors duration-300 ${
+                selectedMenu === 'profile' ? 'bg-gray-700' : ''
+              }`}
+            >
+              <FontAwesomeIcon icon={faUser} className="mr-4" />
+              {isSidebarOpen && <span>My Account</span>}
+            </li>
+
+            <li
+              onClick={() => setSelectedMenu('changePassword')}
+              className={`flex items-center cursor-pointer p-3 rounded-lg hover:bg-gray-700 transition-colors duration-300 ${
+                selectedMenu === 'changePassword' ? 'bg-gray-700' : ''
+              }`}
+            >
+              <FontAwesomeIcon icon={faKey} className="mr-4" />
+              {isSidebarOpen && <span>Change Password</span>}
+            </li>
+
+            <li
+              onClick={() => setSelectedMenu('enquiries')}
+              className={`flex items-center cursor-pointer p-3 rounded-lg hover:bg-gray-700 transition-colors duration-300 ${
+                selectedMenu === 'enquiries' ? 'bg-gray-700' : ''
+              }`}
+            >
+              <FontAwesomeIcon icon={faEnvelope} className="mr-4" />
+              {isSidebarOpen && <span>Enquiries</span>}
+            </li>
+
+            {/* Admin Dashboard (Visible only for admin users) */}
+            {isAdmin && (
               <li
-                onClick={() => setSelectedMenu('profile')}
-                className={`flex items-center cursor-pointer p-2 rounded-lg hover:bg-gray-700 ${
-                  selectedMenu === 'profile' ? 'bg-gray-800' : ''
+                onClick={() => router.push('/admin/dashboard')}
+                className={`flex items-center cursor-pointer p-3 rounded-lg hover:bg-gray-700 transition-colors duration-300 ${
+                  selectedMenu === 'admin' ? 'bg-gray-700' : ''
                 }`}
               >
-                <FontAwesomeIcon icon={faUser} className="mr-4" />
-                <span>My Account</span>
+                <FontAwesomeIcon icon={faUserCog} className="mr-4" />
+                {isSidebarOpen && <span>Admin Dashboard</span>}
               </li>
+            )}
+          </ul>
+        </aside>
 
-              <li
-                onClick={() => setSelectedMenu('changePassword')}
-                className={`flex items-center cursor-pointer p-2 rounded-lg hover:bg-gray-700 ${
-                  selectedMenu === 'changePassword' ? 'bg-gray-800' : ''
-                }`}
-              >
-                <FontAwesomeIcon icon={faKey} className="mr-4" />
-                <span>Change Password</span>
-              </li>
-
-              <li
-                onClick={() => setSelectedMenu('enquiries')}
-                className={`flex items-center cursor-pointer p-2 rounded-lg hover:bg-gray-700 ${
-                  selectedMenu === 'enquiries' ? 'bg-gray-800' : ''
-                }`}
-              >
-                <FontAwesomeIcon icon={faEnvelope} className="mr-4" />
-                <span>Enquiries</span>
-              </li>
-
-              {/* Admin Dashboard (Visible only for admin users) */}
-              {isAdmin && (
-                <li
-                  onClick={() => setSelectedMenu('admin')}
-                  className={`flex items-center cursor-pointer p-2 rounded-lg hover:bg-gray-700 ${
-                    selectedMenu === 'admin' ? 'bg-gray-800' : ''
-                  }`}
-                >
-                  <FontAwesomeIcon icon={faUserCog} className="mr-4" />
-                  <span>Admin Dashboard</span>
-                </li>
-              )}
-
-              <li
-                onClick={handleLogout}
-                className="flex items-center cursor-pointer p-2 rounded-lg hover:bg-red-600 mt-6"
-              >
-                <FontAwesomeIcon icon={faSignOutAlt} className="mr-4" />
-                <span>Log Out</span>
-              </li>
-            </ul>
-          </aside>
-
-          {/* Main content */}
-          <div className="flex-1 p-8 overflow-y-auto">
-            {selectedMenu === 'profile' && <ProfileSection />}
-            {selectedMenu === 'changePassword' && <ChangePasswordSection />}
-            {selectedMenu === 'enquiries' && <EnquiriesSection />}
-            {selectedMenu === 'admin' && isAdmin && <AdminDashboard />}
-          </div>
+        {/* Main content */}
+        <div className="flex-1 p-10 overflow-y-auto bg-gray-100" style={{ marginTop: '4rem' }}>
+          {/* Render selected section */}
+          {selectedMenu === 'profile' && <ProfileSection />}
+          {selectedMenu === 'changePassword' && <ChangePasswordSection />}
+          {selectedMenu === 'enquiries' && <EnquiriesSection />}
         </div>
-
-        {/* Footer */}
-        <Footer />
       </div>
-    </ProtectedRoute>
+
+      {/* Footer */}
+      <Footer />
+    </div>
   );
 };
 
 // Dummy Components for each section
-const ProfileSection = () => <div>Your Profile Info</div>;
-const ChangePasswordSection = () => <div>Change your password here</div>;
-const EnquiriesSection = () => <div>Your enquiries will be listed here</div>;
-const AdminDashboard = () => <div>Admin dashboard (visible to admin users)</div>;
+const ProfileSection = () => (
+  <div className="p-6 bg-white shadow rounded-lg">
+    <h3 className="text-2xl font-semibold mb-4">Your Profile Info</h3>
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div>
+        <p className="font-semibold">Name:</p>
+        <p>John Doe</p>
+      </div>
+      <div>
+        <p className="font-semibold">Email:</p>
+        <p>john@example.com</p>
+      </div>
+      <div>
+        <p className="font-semibold">Role:</p>
+        <p>User</p>
+      </div>
+    </div>
+  </div>
+);
+
+const ChangePasswordSection = () => (
+  <div className="p-6 bg-white shadow rounded-lg">
+    <h3 className="text-2xl font-semibold mb-4">Change Your Password</h3>
+    <p>Form to change your password...</p>
+  </div>
+);
+
+const EnquiriesSection = () => (
+  <div className="p-6 bg-white shadow rounded-lg">
+    <h3 className="text-2xl font-semibold mb-4">Your Enquiries</h3>
+    <p>List of enquiries...</p>
+  </div>
+);
 
 export default Dashboard;
